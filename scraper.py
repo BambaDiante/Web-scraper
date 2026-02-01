@@ -44,9 +44,14 @@ price=contenujumia.find_all(class_='prc')
 for i in range(len(price)):
     price[i]=price[i].text
 
-link=contenujumia.find_all(class_='img')
+# link=contenujumia.find_all(class_='img')
+link=[]
+for a in contenujumia.find_all(attrs={'class':'-fsh0 -pr -me-start -fw'}):
+    img=a.find('img')
+    link.append(img.get('src'))
 
 
+print("TOut est ok")
 for i in range(nbreprod):
     jumiamode.append({'title': title[i], 'price': price[i], 'link': link[i]})
 for i in range(nbreprod):
