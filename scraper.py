@@ -39,12 +39,18 @@ nbreprod=len(contenujumia.find_all(class_='name'))
 title=contenujumia.find_all(class_='name')
 for i in range(len(title)):
     title[i]=title[i].text
+
 price=contenujumia.find_all(class_='prc')
 for i in range(len(price)):
     price[i]=price[i].text
+
+link=contenujumia.find_all(class_='img')
+
+
 for i in range(nbreprod):
-    jumiamode.append({'title': title[i], 'price': price[i]})
+    jumiamode.append({'title': title[i], 'price': price[i], 'link': link[i]})
 for i in range(nbreprod):
     print("Product: ",i+1)
     print("Title: ",jumiamode[i]['title'])
     print("Price: ",jumiamode[i]['price'])
+    print("Link: ",jumiamode[i]['link'])
