@@ -3,59 +3,56 @@ from bs4 import BeautifulSoup
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36'
 }#ceci represente mon user agent car certaine application refue les requete dont les user agent son mal configure
-pagejumia=requests.get('https://www.jumia.sn/',headers=headers)
-pageexpat=requests.get('https://www.expat-dakar.com/',headers=headers)
 
-contenujumia= BeautifulSoup(pagejumia.text, 'html.parser')#ici html parser specifie l'interpreteur que bs utilise
-#page.text quant a lui represente la dom de jumia
-contenuexpat= BeautifulSoup(pageexpat.text, 'html.parser')
-imagesexpat=contenuexpat.find_all('img')
+def recuperer(urlpage):
 
-
-modejumia=requests.get('https://www.jumia.sn/fashion-mode/',headers=headers)
-modejumia=BeautifulSoup(modejumia.text, 'html.parser')
-
-modehommeexpat1=requests.get("https://www.expat-dakar.com/vetements-homme/",headers=headers)
-modehommeexpat2=requests.get("https://www.expat-dakar.com/chaussures-homme/",headers=headers)
-modefemme1expat=requests.get("https://www.expat-dakar.com/vetements-femme",headers=headers)
-modefemme2expat=requests.get("https://www.expat-dakar.com/chaussures-femme",headers=headers)
-modeexpat=requests.get("https://www.expat-dakar.com/accessoires-de-mode/",headers=headers)
-modehommeexpat2=BeautifulSoup(modehommeexpat2.text, 'html.parser')
-modeexpat=BeautifulSoup(modeexpat.text, 'html.parser')
-modefemme1expat=BeautifulSoup(modefemme1expat.text,'html.parser')
-modefemme2expat=BeautifulSoup(modefemme2expat.text, 'html.parser')
-
-# print(modeexpat)
-# print(modefemme1expat)
-# print(modefemme2expat)
-# print(modehommeexpat1)
-# print(modehommeexpat2)
-# print(contenujumia)
-#Je vais maintenant creer des dictionnaires contenant les informations concernant les produit de mode de jumia
-jumiamode=[]
-
-nbreprod=len(contenujumia.find_all(class_='name'))
-# print(nbreprod)
-title=contenujumia.find_all(class_='name')
-for i in range(len(title)):
-    title[i]=title[i].text
-
-price=contenujumia.find_all(class_='prc')
-for i in range(len(price)):
-    price[i]=price[i].text
-
-# link=contenujumia.find_all(class_='img')
-link=[]
-for a in contenujumia.find_all(attrs={'class':'-fsh0 -pr -me-start -fw'}):
-    img=a.find('img')
-    link.append(img.get('src'))
+    page=requests.get(urlpage,headers=headers)
+    contenu=BeautifulSoup(page.text, 'html.parser')
+    return contenu
 
 
-print("TOut est ok")
-for i in range(nbreprod):
-    jumiamode.append({'title': title[i], 'price': price[i], 'link': link[i]})
-for i in range(nbreprod):
-    print("Product: ",i+1)
-    print("Title: ",jumiamode[i]['title'])
-    print("Price: ",jumiamode[i]['price'])
-    print("Link: ",jumiamode[i]['link'])
+def parse_content(url,selectername,selecterprice,selecterlink,srcimg,titre,prix,lien):
+
+    titre=url.find_all(class_=selectername)
+    for j in range(len(titre)):
+        titre[j]=titre[j].text
+
+    prix=url.find_all(class_=selecterprice)
+    for j in range(len(prix)):
+        prix[j]=prix[j].text
+    for a in url.find_all(attrs={'class':selecterlink}):
+        img=a.find('img')
+        lien.append(img.get(srcimg))
+    return(titre,prix,lien)
+
+#
+def affiche(titre,prix,lien):
+    for i in range (len(titre)):
+        print("Produit: ",i)
+        print("Titre: ",titre[i])
+        print("Prix: ",prix[i])
+        print("Lien: ",lien[i])
+        i=i+1
+
+url=(input("Veuillez renseigner le lien de la page que vous voulez scraper :"))
+
+contenu=recuperer(url)
+
+title=[]
+prix=[]
+lien=[]
+sn=input("Veuillez entrer la class dans lequel on a le nom des produit: ")
+sp=input("Veuillez entrer la class dans lequel on a le prix des produit: ")
+sl=input("Veuillez entrer la class dans lequel on a l'image du produit: ")
+src=input("Saisir le selecteur dans lequel on a le lien de l'image du produit: ")
+
+title,prix,lien=parse_content(contenu,sn,sp,sl,src,title,prix,lien)
+
+print("Affichage des informations du produit")
+
+
+affiche(title,prix,lien)
+
+
+
+
