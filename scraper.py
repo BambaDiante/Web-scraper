@@ -1,9 +1,19 @@
 import requests
+
 from bs4 import BeautifulSoup
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36'
 }#ceci represente mon user agent car certaine application refue les requete dont les user agent son mal configure
 
+def nettoiprix(prix_texte):
+    chiffres = ""
+    for caractere in prix_texte:
+        if caractere.isdigit():
+            chiffres = chiffres + caractere
+    if chiffres != "":
+        return int(chiffres)
+    else:
+        return 0
 def recuperer(urlpage):
 
     page=requests.get(urlpage,headers=headers)
@@ -20,6 +30,8 @@ def parse_content(url,selectername,selecterprice,selecterlink,srcimg,titre,prix,
     prix=url.find_all(class_=selecterprice)
     for j in range(len(prix)):
         prix[j]=prix[j].text
+        prix[j]=nettoiprix(prix[j])
+
     for a in url.find_all(attrs={'class':selecterlink}):
         img=a.find('img')
         lien.append(img.get(srcimg))
@@ -33,6 +45,8 @@ def affiche(titre,prix,lien):
         print("Prix: ",prix[i])
         print("Lien: ",lien[i])
         i=i+1
+# def afficher(prix):
+#     print(prix)
 
 url=(input("Veuillez renseigner le lien de la page que vous voulez scraper :"))
 
