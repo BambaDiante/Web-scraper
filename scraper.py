@@ -17,10 +17,17 @@ def nettoiprix(prix_texte):
     else:
         return 0
 def recuperer(urlpage):
+    try:
 
-    page=requests.get(urlpage,headers=headers)
-    contenu=BeautifulSoup(page.text, 'html.parser')
-    return contenu
+        page=requests.get(urlpage,headers=headers)
+        contenu=BeautifulSoup(page.text, 'html.parser')
+        return contenu
+
+    except Exception as e:
+
+        printf("Erreur sur votre page {urlpage}: {e}")
+        return None
+    
 def get_all_pages(lien,nbres):
 
     urls=[]
@@ -32,9 +39,12 @@ def get_all_pages(lien,nbres):
         urls.append(i)
     for i in range(len(urls)):
 
-        page=requests.get(urls[i],headers=headers)
-        contenu = BeautifulSoup(page.text, 'html.parser')
-        urls[i]=contenu
+        try:
+            page=requests.get(urls[i],headers=headers)
+            contenu = BeautifulSoup(page.text, 'html.parser')
+            urls[i]=contenu
+        except Exception as e:
+            print(f"Impossible de communiquer avec: {url[i]},erreur: {e}")
 
     return urls
 
@@ -44,20 +54,26 @@ def parse_content(url,selectername,selecterprice,selecterlink,srcimg,titre,prix,
 
     titre=url.find_all(class_=selectername)
     for j in range(len(titre)):
-
-        titre[j]=titre[j].text
-        titre[j]=titre[j].strip()
+        try:
+            titre[j]=titre[j].text
+            titre[j]=titre[j].strip()
+        except Exception as e:
+            print(f"Erreur: {e}")
 
     prix=url.find_all(class_=selecterprice)
     for j in range(len(prix)):
-
-        prix[j]=prix[j].text
-        prix[j]=nettoiprix(prix[j])
+        try:
+            prix[j]=prix[j].text
+            prix[j]=nettoiprix(prix[j])
+        except Exception as e:
+            print(f"Erreur: {e}")
 
     for a in url.find_all(attrs={'class':selecterlink}):
-
-        img=a.find('img')
-        lien.append(img.get(srcimg))
+        try:
+            img=a.find('img')
+            lien.append(img.get(srcimg))
+        except Exception as e:
+            print(f"Erreur: {e}")
 
     return(titre,prix,lien)
 
@@ -209,13 +225,13 @@ else:
         if i == "1":
             for i in range(len(Produits)):
                 curseur.execute(f"INSERT INTO {table} (source, category, titre, prix, lien) VALUES (?,?,?,?,?)",
-                                (
-                                    Produits[i]['source'],
-                                    Produits[i]['categorie'],
-                                    Produits[i]['titre'],
-                                    Produits[i]['prix'],
-                                    Produits[i]['lien']
-                                ))
+                    (
+                        Produits[i]['source'],
+                        Produits[i]['categorie'],
+                        Produits[i]['titre'],
+                        Produits[i]['prix'],
+                        Produits[i]['lien']
+                    ))
             db.commit()
             print("Informations enregistrees avec succes")
 
