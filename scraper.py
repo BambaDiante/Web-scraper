@@ -27,7 +27,7 @@ def recuperer(urlpage):
 
         printf("Erreur sur votre page {urlpage}: {e}")
         return None
-    
+
 def get_all_pages(lien,nbres):
 
     urls=[]
@@ -206,36 +206,52 @@ else:
             break
     print("Affichage des informations du produit")
     affiche(titre_final,prix_final,lien_final)
-    db = sqlite3.connect('database.db')
-    # ceci est mon curseur il sert a executer des requetes dans ma base de donnees
-    curseur = db.cursor()
-    curseur.execute("""
-    CREATE TABLE IF NOT EXISTS electronique(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        source VARCHAR NOT NULL,
-        category VARCHAR NOT NULL,
-        titre VARCHAR NOT NULL,
-        prix INTEGER NOT NULL,
-        lien VARCHAR NOT NULL
-        )
-    """)
+
+    def creation(table):
+        try:
+            db = sqlite3.connect('database.db')
+            # ceci est mon curseur il sert a executer des requetes dans ma base de donnees
+            curseur = db.cursor()
+            curseur.execute(f"""
+            CREATE TABLE IF NOT EXISTS {table}(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                source VARCHAR NOT NULL,
+                category VARCHAR NOT NULL,
+                titre VARCHAR NOT NULL,
+                prix INTEGER NOT NULL,
+                lien VARCHAR NOT NULL
+                )
+            """)
+            db.close()
+        except Exception as e:
+            print(f"Erreur {e} lors de la creation de la table {table}")
 
     def enregistrer(Produits, table):
+
         i = input("Tapez 1 pour enregistrer vers la base de donnee: ")
         if i == "1":
-            for i in range(len(Produits)):
-                curseur.execute(f"INSERT INTO {table} (source, category, titre, prix, lien) VALUES (?,?,?,?,?)",
-                    (
-                        Produits[i]['source'],
-                        Produits[i]['categorie'],
-                        Produits[i]['titre'],
-                        Produits[i]['prix'],
-                        Produits[i]['lien']
-                    ))
-            db.commit()
-            print("Informations enregistrees avec succes")
+            try:
+                db = sqlite3.connect('database.db')
+                curseur = db.cursor()
+                for i in range(len(Produits)):
+                    curseur.execute(f"INSERT INTO {table} (source, category, titre, prix, lien) VALUES (?,?,?,?,?)",
+                        (
+                            Produits[i]['source'],
+                            Produits[i]['categorie'],
+                            Produits[i]['titre'],
+                            Produits[i]['prix'],
+                            Produits[i]['lien']
+                        ))
+                db.commit()
+                print("Informations enregistrees avec succes")
+                db.close()
+            except Exception as e:
+                print(f"Erreur {e} lors de l'enregistrement dans la base de donnee")
 
+    print("============Creation de la table dans la base de donnees============")
+    table=input("Veuillez saisir le nom de la table a creer: ")
+    creation(table)
 
+    print("==========Enregistrement dans la base de donnee==============")
     page = affecter(titre_final, prix_final, lien_final, 'electronique', 'expat-dakar')
-    enregistrer(page, 'electronique')
-    db.close()
+    enregistrer(page, table)
