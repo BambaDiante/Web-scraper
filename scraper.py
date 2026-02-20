@@ -25,7 +25,7 @@ def recuperer(urlpage):
 
     except Exception as e:
 
-        printf("Erreur sur votre page {urlpage}: {e}")
+        print("Erreur sur votre page {urlpage}: {e}")
         return None
 
 def get_all_pages(lien,nbres):
@@ -111,10 +111,53 @@ def affecter(titre,prix,lien,category,source):
 
     return Page
 
+def creation(table):
+    try:
+        # creer ou ouvir le fichier de la base de donnee
+        db = sqlite3.connect('database.db')
+        # ceci est mon curseur il sert a executer des requetes dans ma base de donnees
+        curseur = db.cursor()
+        curseur.execute(f"""
+        CREATE TABLE IF NOT EXISTS {table}(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            source VARCHAR NOT NULL,
+            category VARCHAR NOT NULL,
+            titre VARCHAR NOT NULL,
+            prix INTEGER NOT NULL,
+            lien VARCHAR NOT NULL
+            )
+        """)
+        db.close()
+    except Exception as e:
+        print(f"Erreur {e} lors de la creation de la table {table}")
+
+def enregistrer(Produits, table):
+
+    i = input("Tapez 1 pour enregistrer vers la base de donnee: ")
+    if i == "1":
+        try:
+            db = sqlite3.connect('database.db')
+            curseur = db.cursor()
+            for i in range(len(Produits)):
+                curseur.execute(f"INSERT INTO {table} (source, category, titre, prix, lien) VALUES (?,?,?,?,?)",
+                    (
+                        Produits[i]['source'],
+                        Produits[i]['categorie'],
+                        Produits[i]['titre'],
+                        Produits[i]['prix'],
+                        Produits[i]['lien']
+                    ))
+            db.commit()
+            print("Informations enregistrees avec succes")
+            db.close()
+        except Exception as e:
+            print(f"Erreur {e} lors de l'enregistrement dans la base de donnee")
+
+
 reponse=input("Vous voulez scraper une ou plusieurs pages?(Tapez 1 si vous ne voulez scraper qu'une page): ")
 
 if reponse=="1":
-
+    print("==============Scraping de la page=====================")
     url=(input("Veuillez renseigner le lien de la page que vous voulez scraper :"))
 
     contenu=recuperer(url)
@@ -133,45 +176,17 @@ if reponse=="1":
 
     affiche(title,prix,lien)
     #creer ou ouvir le fichier de la base de donnee
-    db=sqlite3.connect('database.db')
-    #ceci est mon curseur il sert a executer des requetes dans ma base de donnees
-    curseur=db.cursor()
+    print("============Creation de la table dans la base de donnees============")
+    table = input("Veuillez saisir le nom de la table a creer: ")
+    creation(table)
 
-    curseur.execute("""
-    CREATE TABLE IF NOT EXISTS electronique (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        source VARCHAR NOT NULL,
-        category VARCHAR NOT NULL,
-        titre VARCHAR NOT NULL,
-        prix INTEGER NOT NULL,
-        lien VARCHAR NOT NULL
-    )
-    """)
-
-    def enregistrer(Produits, table):
-
-        i=input("Tapez 1 pour enregistrer vers la base de donnee: ")
-        if i=="1":
-
-            for i in range(len(Produits)):
-
-                curseur.execute(f"INSERT INTO {table} (source, category, titre, prix, lien) VALUES (?,?,?,?,?)",
-                    (
-                        Produits[i]['source'],
-                        Produits[i]['categorie'],
-                        Produits[i]['titre'],
-                        Produits[i]['prix'],
-                        Produits[i]['lien']
-                    ))
-            db.commit()
-            print("Informations enregistrees avec succes")
-
-    page=affecter(title,prix,lien,'electronique','expat-dakar')
-    enregistrer(page,'electronique')
-    db.close()
+    print("==========Enregistrement dans la base de donnee==============")
+    source=input("Veuillez saisir le source de la page: ")
+    page = affecter(title, prix, lien, table,source)
+    enregistrer(page, table)
 
 else:
-
+    print("==============Scraping de la page=====================")
     urldefault=input("Saisir l'url par defaut: ")
     nbres=input("Saisir le nombre de page a scraper : ")
     nbres=int(nbres)
@@ -207,51 +222,12 @@ else:
     print("Affichage des informations du produit")
     affiche(titre_final,prix_final,lien_final)
 
-    def creation(table):
-        try:
-            db = sqlite3.connect('database.db')
-            # ceci est mon curseur il sert a executer des requetes dans ma base de donnees
-            curseur = db.cursor()
-            curseur.execute(f"""
-            CREATE TABLE IF NOT EXISTS {table}(
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                source VARCHAR NOT NULL,
-                category VARCHAR NOT NULL,
-                titre VARCHAR NOT NULL,
-                prix INTEGER NOT NULL,
-                lien VARCHAR NOT NULL
-                )
-            """)
-            db.close()
-        except Exception as e:
-            print(f"Erreur {e} lors de la creation de la table {table}")
-
-    def enregistrer(Produits, table):
-
-        i = input("Tapez 1 pour enregistrer vers la base de donnee: ")
-        if i == "1":
-            try:
-                db = sqlite3.connect('database.db')
-                curseur = db.cursor()
-                for i in range(len(Produits)):
-                    curseur.execute(f"INSERT INTO {table} (source, category, titre, prix, lien) VALUES (?,?,?,?,?)",
-                        (
-                            Produits[i]['source'],
-                            Produits[i]['categorie'],
-                            Produits[i]['titre'],
-                            Produits[i]['prix'],
-                            Produits[i]['lien']
-                        ))
-                db.commit()
-                print("Informations enregistrees avec succes")
-                db.close()
-            except Exception as e:
-                print(f"Erreur {e} lors de l'enregistrement dans la base de donnee")
 
     print("============Creation de la table dans la base de donnees============")
     table=input("Veuillez saisir le nom de la table a creer: ")
     creation(table)
 
     print("==========Enregistrement dans la base de donnee==============")
-    page = affecter(titre_final, prix_final, lien_final, 'electronique', 'expat-dakar')
+    source = input("Veuillez saisir le source de la page: ")
+    page = affecter(titre_final, prix_final, lien_final,table,source)
     enregistrer(page, table)
