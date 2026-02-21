@@ -121,7 +121,7 @@ def creation(table):
         CREATE TABLE IF NOT EXISTS {table}(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             source VARCHAR NOT NULL,
-            category VARCHAR NOT NULL,
+            category VARCHAR NOT NULL, 
             titre VARCHAR NOT NULL,
             prix INTEGER NOT NULL,
             lien VARCHAR NOT NULL
@@ -136,6 +136,7 @@ def enregistrer(Produits, table):
     i = input("Tapez 1 pour enregistrer vers la base de donnee: ")
     if i == "1":
         try:
+            # creer ou ouvir le fichier de la base de donnee
             db = sqlite3.connect('database.db')
             curseur = db.cursor()
             for i in range(len(Produits)):
@@ -175,7 +176,7 @@ if reponse=="1":
     print("Affichage des informations du produit")
 
     affiche(title,prix,lien)
-    #creer ou ouvir le fichier de la base de donnee
+
     print("============Creation de la table dans la base de donnees============")
     table = input("Veuillez saisir le nom de la table a creer: ")
     creation(table)
