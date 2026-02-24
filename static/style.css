@@ -1,0 +1,10 @@
+body {
+  background: linear-gradient(to left, #511886, black);
+  color:white;
+  font-family:impact;
+}
+h1{
+   display:flex;
+   justify-content:center;
+   align-items:center;
+}

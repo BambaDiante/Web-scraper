@@ -3,7 +3,7 @@ import base
 app = Flask(__name__)
 @app.route('/')
 def index():
-    return "Web scraper entre Jumia et Expat-Dakar"
+    return render_template("acceuil.html")
 
 @app.route('/search/<nom_produit>')
 def search(nom_produit):
@@ -19,7 +19,6 @@ def search(nom_produit):
 
 @app.route("/<source>/<category>")
 def select(source,category):
-    categories = base.get_category()
     produits=base.get_cat_from_source(source,category)
     return jsonify(produits)
 
