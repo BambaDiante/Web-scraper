@@ -1,3 +1,4 @@
+#ce code est le code du scrpaer pour recupere les elements et les affecter vers ma base de donnees
 import requests
 import sqlite3
 from bs4 import BeautifulSoup

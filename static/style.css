@@ -2,9 +2,20 @@ body {
   background: linear-gradient(to left, #511886, black);
   color:white;
   font-family:impact;
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  
 }
 h1{
-   display:flex;
-   justify-content:center;
-   align-items:center;
+  width:42ch;
+  white-space:nowrap;
+  overflow:hidden;
+  animation:typing 5s steps(42) forwards;
+}
+@keyframes typing{
+  from {
+    width: 0;
+  }
+  
 }

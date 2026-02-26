@@ -1,3 +1,5 @@
+#ce code la est le code me permmetant de me connecter et d'executer les requetes voulues vers ma base de donnees
+
 import sqlite3
 from flask import jsonify
 def get_category():

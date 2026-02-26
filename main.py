@@ -1,4 +1,5 @@
-from flask import Flask, render_template,jsonify
+#ce code est le code source me permettant de configureer les routes de mon api
+from flask import Flask, render_template,jsonify,request
 import base
 app = Flask(__name__)
 @app.route('/')
@@ -29,3 +30,15 @@ def compare(nom_produit):
         "query": nom_produit,
         "results": resultats
     })
+@app.route("/rechercher",methods =['GET','POST'])
+def rechercher():
+    if request.method=="POST":
+        #si le formulaire a ete envoyee
+        donnees = request.form
+        produit=donnees.get("produit recherche")
+        produits=base.compare(produit)
+        print(produits)
+    else:
+        #si on est a la methode get 
+        produits=None
+    return render_template("recherche.html", resultats=produits)
