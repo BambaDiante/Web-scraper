@@ -51,7 +51,7 @@ def get_all_pages(lien,nbres):
 
 
 
-def parse_content(url,selectername,selecterprice,selecterlink,srcimg,titre,prix,lien):
+def parse_content(url,selectername,selecterprice,selecterlink,selecterurl,srcimg,titre,prix,lien,urls):
 
     titre=url.find_all(class_=selectername)
     for j in range(len(titre)):
@@ -76,10 +76,24 @@ def parse_content(url,selectername,selecterprice,selecterlink,srcimg,titre,prix,
         except Exception as e:
             print(f"Erreur: {e}")
 
-    return(titre,prix,lien)
+    for a in url.find_all(attrs={'class':selecterurl}):
+        try:
+            a=a.find('a')
+            urls.append(a.get('href'))
+        except Exception as e:
+            print(f"Erreur: {e}")
+
+    return(titre,prix,lien,urls)
+def remplirurl(source,url):
+    for i in range(len(url)):
+        try:
+            url[i]=source+"/"+url[i]
+        except Exception as e:
+            print(f"Erreur: {e}")
+    return(url)
 
 #min prends la longueur minimum car il ya des artciles qui n'ont pas de prix ou d'image chez expat-dakar
-def affiche(titre, prix, lien):
+def affiche(titre, prix, lien,url):
 
     longueur = min(len(titre), len(prix), len(lien))
     for i in range(longueur):
@@ -90,22 +104,24 @@ def affiche(titre, prix, lien):
             print("Titre:", titre[i])
             print("Prix:", prix[i])
             print("Lien:", lien[i])
+            print("URL:", url)
 
 #     print(prix)
 
-def affecter(titre,prix,lien,category,source):
+def affecter(titre,prix,lien,url,category,source):
 
     Page=[]
     longueur = min(len(titre), len(prix), len(lien))
     for j in range(longueur):
 
-        if (titre[j]!="") and (prix[j]!=0) and (lien[j]!=""):
+        if (titre[j]!="") and (prix[j]!=0) and (lien[j]!="") and (url[j]!=""):
             produit={
                 'source':source,
                 'categorie':category,
                 'titre':titre[j],
                 'prix':prix[j],
                 'lien':lien[j],
+                'url':url[j],
             }
             Page.append(produit)
     print("Informations affecte a la page avec succes")
@@ -115,7 +131,7 @@ def affecter(titre,prix,lien,category,source):
 def creation(table):
     try:
         # creer ou ouvir le fichier de la base de donnee
-        db = sqlite3.connect('database.db')
+        db = sqlite3.connect('produits.db')
         # ceci est mon curseur il sert a executer des requetes dans ma base de donnees
         curseur = db.cursor()
         curseur.execute(f"""
@@ -125,7 +141,8 @@ def creation(table):
             category VARCHAR NOT NULL, 
             titre VARCHAR NOT NULL,
             prix INTEGER NOT NULL,
-            lien VARCHAR NOT NULL
+            lien VARCHAR NOT NULL,
+            url VARCHAR NOT NULL
             )
         """)
         db.close()
@@ -138,16 +155,17 @@ def enregistrer(Produits, table):
     if i == "1":
         try:
             # creer ou ouvir le fichier de la base de donnee
-            db = sqlite3.connect('database.db')
+            db = sqlite3.connect('produits.db')
             curseur = db.cursor()
             for i in range(len(Produits)):
-                curseur.execute(f"INSERT INTO {table} (source, category, titre, prix, lien) VALUES (?,?,?,?,?)",
+                curseur.execute(f"INSERT INTO {table} (source, category, titre, prix, lien,url) VALUES (?,?,?,?,?,?)",
                     (
                         Produits[i]['source'],
                         Produits[i]['categorie'],
                         Produits[i]['titre'],
                         Produits[i]['prix'],
-                        Produits[i]['lien']
+                        Produits[i]['lien'],
+                        Produits[i]['url']
                     ))
             db.commit()
             print("Informations enregistrees avec succes")
@@ -160,23 +178,26 @@ reponse=input("Vous voulez scraper une ou plusieurs pages?(Tapez 1 si vous ne vo
 
 if reponse=="1":
     print("==============Scraping de la page=====================")
-    url=(input("Veuillez renseigner le lien de la page que vous voulez scraper :"))
+    urls=(input("Veuillez renseigner le lien de la page que vous voulez scraper :"))
 
-    contenu=recuperer(url)
+    contenu=recuperer(urls)
     page=[]
     title=[]
     prix=[]
     lien=[]
+    url=[]
     sn=input("Veuillez entrer la class dans lequel on a le nom des produit: ")
     sp=input("Veuillez entrer la class dans lequel on a le prix des produit: ")
     sl=input("Veuillez entrer la class dans lequel on a l'image du produit: ")
     src=input("Saisir le selecteur dans lequel on a le lien de l'image du produit: ")
+    surl=input("Saisir le selecteur dans lequel on a le lien de l'annnce du produits: ")
 
-    title,prix,lien=parse_content(contenu,sn,sp,sl,src,title,prix,lien)
+    title,prix,lien,url=parse_content(contenu,sn,sp,sl,src,surl,title,prix,lien,url)
+    url=remplirurl(urls,url)
 
     print("Affichage des informations du produit")
 
-    affiche(title,prix,lien)
+    affiche(title,prix,lien,url)
 
     print("============Creation de la table dans la base de donnees============")
     table = input("Veuillez saisir le nom de la table a creer: ")
@@ -184,11 +205,11 @@ if reponse=="1":
 
     print("==========Enregistrement dans la base de donnee==============")
     source=input("Veuillez saisir le source de la page: ")
-    page = affecter(title, prix, lien, table,source)
+    page = affecter(title, prix, lien,url, table,source)
     enregistrer(page, table)
 
 else:
-    print("==============Scraping de la page=====================")
+    print("==============Scraping des pages d'un catalogue=====================")
     urldefault=input("Saisir l'url par defaut: ")
     nbres=input("Saisir le nombre de page a scraper : ")
     nbres=int(nbres)
@@ -196,11 +217,13 @@ else:
     titre_final=[]
     prix_final=[]
     lien_final=[]
+    url_final=[]
 
     sn=input("Veuillez entrer la class dans lequel on a le nom des produit: ")
     sp=input("Veuillez entrer la class dans lequel on a le prix des produit: ")
     sl=input("Veuillez entrer la class dans lequel on a l'image du produit: ")
     src=input("Saisir le selecteur dans lequel on a le lien de l'image du produit: ")
+    surl=input("Saisir le selecteur dans lequel on a le lien de l'annnce du produit: ")
 
     for i in range(nbres):
 
@@ -209,12 +232,15 @@ else:
             title=[]
             prix=[]
             lien=[]
-            lien_temp=f"{urldefault}{i}"
-            lien_temp=recuperer(lien_temp)
-            title, prix, lien = parse_content(lien_temp, sn, sp, sl, src, title, prix, lien)
+            url=[]
+            lien_temporaire=f"{urldefault}{i}"
+            lien_temp=recuperer(lien_temporaire)
+            title, prix, lien,url = parse_content(lien_temp, sn, sp, sl, src,surl, title, prix, lien,url)
             titre_final.extend(title)
             prix_final.extend(prix)
             lien_final.extend(lien)
+            url=remplirurl(lien_temporaire,url)
+            url_final.extend(url)
 
         except Exception as e:
 
@@ -222,7 +248,7 @@ else:
             print(f"Le scrap s'arrete a la page {i}")
             break
     print("Affichage des informations du produit")
-    affiche(titre_final,prix_final,lien_final)
+    affiche(titre_final,prix_final,lien_final,url_final)
 
 
     print("============Creation de la table dans la base de donnees============")
@@ -231,5 +257,5 @@ else:
 
     print("==========Enregistrement dans la base de donnee==============")
     source = input("Veuillez saisir le source de la page: ")
-    page = affecter(titre_final, prix_final, lien_final,table,source)
+    page = affecter(titre_final, prix_final, lien_final,url_final,table,source)
     enregistrer(page, table)

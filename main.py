@@ -25,19 +25,24 @@ def select(source,category):
 
 @app.route("/compare/<nom_produit>")
 def compare(nom_produit):
-    resultats=base.compare(nom_produit)
+
+    categories = base.get_category()
+    produits=base.get_product(nom_produit,categories)
+    
     return jsonify({
         "query": nom_produit,
-        "results": resultats
+        "results": produits
     })
+
 @app.route("/rechercher",methods =['GET','POST'])
 def rechercher():
     if request.method=="POST":
         #si le formulaire a ete envoyee
         donnees = request.form
-        produit=donnees.get("produit recherche")
-        produits=base.compare(produit)
-        print(produits)
+        produit=donnees.get("produit recherche")       
+        categories = base.get_category()
+        produits=base.get_product(produit,categories)
+        # print(produits)
     else:
         #si on est a la methode get 
         produits=None
