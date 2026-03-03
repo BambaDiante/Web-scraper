@@ -12,6 +12,7 @@ def nettoiprix(prix_texte):
     chiffres = ""
     if "-" in prix_texte:
         prix1=prix_texte.split("-")
+        prix1=prix1[0]
         for caractere in prix1:
             if caractere.isdigit():
                 chiffres = chiffres + caractere
@@ -23,10 +24,13 @@ def nettoiprix(prix_texte):
         for caractere in prix_texte:
             if caractere.isdigit():
                 chiffres = chiffres + caractere
+            elif caractere=="-" or caractere==".":
+                break
         if chiffres != "":
             return int(chiffres)
         else:
             return 0
+
 def recuperer(urlpage):
     try:
 
@@ -96,6 +100,7 @@ def parse_content(url,selectername,selecterprice,selecterlink,selecterurl,srcimg
     return(titre,prix,lien,urls)
 
 def remplirurl(source,url):
+
     for i in range(len(url)):
         try:
             url[i]=source[0:-1]+url[i]

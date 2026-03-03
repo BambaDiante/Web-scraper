@@ -4,7 +4,7 @@ import base
 app = Flask(__name__)
 @app.route('/')
 def index():
-    return render_template("acceuil.html")
+    return render_template("loginpage.html")
 
 @app.route('/search/<nom_produit>')
 def search(nom_produit):
