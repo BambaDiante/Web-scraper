@@ -10,13 +10,23 @@ headers = {
 
 def nettoiprix(prix_texte):
     chiffres = ""
-    for caractere in prix_texte:
-        if caractere.isdigit():
-            chiffres = chiffres + caractere
-    if chiffres != "":
-        return int(chiffres)
+    if "-" in prix_texte:
+        prix1=prix_texte.split("-")
+        for caractere in prix1:
+            if caractere.isdigit():
+                chiffres = chiffres + caractere
+        if chiffres != "":
+            return int(chiffres)
+        else:
+            return 0
     else:
-        return 0
+        for caractere in prix_texte:
+            if caractere.isdigit():
+                chiffres = chiffres + caractere
+        if chiffres != "":
+            return int(chiffres)
+        else:
+            return 0
 def recuperer(urlpage):
     try:
 
@@ -26,7 +36,7 @@ def recuperer(urlpage):
 
     except Exception as e:
 
-        print("Erreur sur votre page {urlpage}: {e}")
+        print(f"Erreur sur votre page {urlpage}: {e}")
         return None
 
 def get_all_pages(lien,nbres):
@@ -84,10 +94,11 @@ def parse_content(url,selectername,selecterprice,selecterlink,selecterurl,srcimg
             print(f"Erreur: {e}")
 
     return(titre,prix,lien,urls)
+
 def remplirurl(source,url):
     for i in range(len(url)):
         try:
-            url[i]=source+"/"+url[i]
+            url[i]=source[0:-1]+url[i]
         except Exception as e:
             print(f"Erreur: {e}")
     return(url)
@@ -95,7 +106,8 @@ def remplirurl(source,url):
 #min prends la longueur minimum car il ya des artciles qui n'ont pas de prix ou d'image chez expat-dakar
 def affiche(titre, prix, lien,url):
 
-    longueur = min(len(titre), len(prix), len(lien))
+    longueur = min(len(titre), len(prix), len(lien),len(url))
+    print("Le nombre de produit est: "+str(longueur))
     for i in range(longueur):
 
         if titre[i] and prix[i] and lien[i]:
@@ -104,14 +116,14 @@ def affiche(titre, prix, lien,url):
             print("Titre:", titre[i])
             print("Prix:", prix[i])
             print("Lien:", lien[i])
-            print("URL:", url)
+            print("URL:", url[i])
 
 #     print(prix)
 
 def affecter(titre,prix,lien,url,category,source):
 
     Page=[]
-    longueur = min(len(titre), len(prix), len(lien))
+    longueur = min(len(titre), len(prix), len(lien),len(url))
     for j in range(longueur):
 
         if (titre[j]!="") and (prix[j]!=0) and (lien[j]!="") and (url[j]!=""):
@@ -192,7 +204,7 @@ if reponse=="1":
     src=input("Saisir le selecteur dans lequel on a le lien de l'image du produit: ")
     surl=input("Saisir le selecteur dans lequel on a le lien de l'annnce du produits: ")
 
-    title,prix,lien,url=parse_content(contenu,sn,sp,sl,src,surl,title,prix,lien,url)
+    title,prix,lien,url=parse_content(contenu,sn,sp,sl,surl,src,title,prix,lien,url)
     url=remplirurl(urls,url)
 
     print("Affichage des informations du produit")
@@ -235,7 +247,7 @@ else:
             url=[]
             lien_temporaire=f"{urldefault}{i}"
             lien_temp=recuperer(lien_temporaire)
-            title, prix, lien,url = parse_content(lien_temp, sn, sp, sl, src,surl, title, prix, lien,url)
+            title, prix, lien,url = parse_content(lien_temp, sn, sp, sl,surl, src, title, prix, lien,url)
             titre_final.extend(title)
             prix_final.extend(prix)
             lien_final.extend(lien)

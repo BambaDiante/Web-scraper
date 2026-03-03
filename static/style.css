@@ -11,7 +11,7 @@ h1{
   width:42ch;
   white-space:nowrap;
   overflow:hidden;
-  animation:typing 5s steps(42) forwards;
+  animation:typing 2s steps(31) forwards;
 }
 @keyframes typing{
   from {
