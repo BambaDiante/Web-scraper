@@ -1,7 +1,9 @@
 #ce code est le code source me permettant de configureer les routes de mon api
-from flask import Flask, render_template,jsonify,request
+from flask import Flask, render_template,jsonify,request,redirect,url_for,session
 import base
+
 app = Flask(__name__)
+app.secret_key='%##!t09144KVcn021@%d@nXt8&4%wP'
 @app.route('/')
 def index():
     return render_template("loginpage.html")
@@ -47,3 +49,26 @@ def rechercher():
         #si on est a la methode get 
         produits=None
     return render_template("recherche.html", resultats=produits)
+@app.route("/home")
+def home():
+    if 'username' in session:
+        return render_template('homepage.html')
+    else:
+        return redirect(url_for('registration'))
+
+@app.route("/registration",methods =['GET','POST'])
+def registration():
+    if request.method=="POST":
+        formulaire = request.form
+        session['username'] = request.form['name']
+        name=formulaire.get("name")
+        email=formulaire.get("mail")
+        password=formulaire.get("password")
+        phone=formulaire.get("telephone")
+        adresse=formulaire.get("adresse")
+        date=formulaire.get("date")
+        base.enregister(name,email,adresse,date,phone,password)
+        if render_template("loginpage.html"):
+            return render_template("homepage.html")
+    else:
+        return render_template("loginpage.html")

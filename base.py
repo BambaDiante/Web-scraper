@@ -1,5 +1,5 @@
 #ce code la est le code me permmetant de me connecter et d'executer les requetes voulues vers ma base de donnees
-
+from flask import redirect,url_for
 import sqlite3
 from flask import jsonify
 def get_category():
@@ -98,3 +98,40 @@ def compare(nom_produit):
         print(f"Erreur :{e}")
         connection.close()
         return []
+
+
+def enregister(nom, mail, adresse, date, numero,password):
+    try:
+        connection = sqlite3.connect('users.db')
+        cursor = connection.cursor()
+        #creation de la table
+        cursor.execute("""
+           CREATE TABLE IF NOT EXISTS utilisateurs
+               (
+                   id      INTEGER PRIMARY KEY AUTOINCREMENT,
+                   nom     VARCHAR NOT NULL,
+                   mail    VARCHAR NOT NULL,
+                   adresse VARCHAR NOT NULL,
+                   password VARCHAR NOT NULL,
+                   date    DATE NOT NULL,
+                   numero  INTEGER NOT NULL
+               )
+           """)
+        #insertion des donness
+        cursor.execute("""
+                       INSERT INTO utilisateurs (nom, mail, adresse, date, numero,password)
+                       VALUES (?, ?, ?, ?, ?,?)
+                       """,
+                       (nom, mail, adresse, date, numero,password)
+                       )
+
+
+        connection.commit()
+
+        print("Utilisateur enregistré avec succès !")
+        redirect(url_for('template', filename='homepage.html'))
+
+    except Exception as e:
+        print(f"Erreur lors de l'enregistrement : {e}")
+    finally:
+        connection.close()
