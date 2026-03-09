@@ -22,5 +22,19 @@
       <jdbc-url>jdbc:sqlite:C:\Users\ahmad\PyCharmMiscProject\Projects\Python-web-scraper\produits.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="utilisateurs.db" uuid="350085ed-6165-4800-a4ae-1c30d8d668dc">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:instance/utilisateurs.db</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="users.db" uuid="cc3e361d-b868-46cb-a0cb-2f43c310bca3">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:C:\Users\ahmad\PyCharmMiscProject\Projects\Python-web-scraper\users.db</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>
