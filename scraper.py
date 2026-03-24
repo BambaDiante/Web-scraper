@@ -73,7 +73,7 @@ def parse_content(url,selectername,selecterprice,selecterlink,selecterurl,srcimg
             titre[j]=titre[j].text
             titre[j]=titre[j].strip()
         except Exception as e:
-            print(f"Erreur: {e}")
+            print(f"Erreur: {e} lors de la recuperation du titre du produit")
 
     prix=url.find_all(class_=selecterprice)
     for j in range(len(prix)):
@@ -81,14 +81,14 @@ def parse_content(url,selectername,selecterprice,selecterlink,selecterurl,srcimg
             prix[j]=prix[j].text
             prix[j]=nettoiprix(prix[j])
         except Exception as e:
-            print(f"Erreur: {e}")
+            print(f"Erreur: {e} lors de la recuperation du prix du produit")
 
     for a in url.find_all(attrs={'class':selecterlink}):
         try:
             img=a.find('img')
             lien.append(img.get(srcimg))
         except Exception as e:
-            print(f"Erreur: {e}")
+            print(f"Erreur: {e} lors de la recuperation du lien de l'image")
 
     for a in url.find_all(attrs={'class': selecterurl}):
         try:
