@@ -92,10 +92,12 @@ def parse_content(url,selectername,selecterprice,selecterlink,selecterurl,srcimg
 
     for a in url.find_all(attrs={'class': selecterurl}):
         try:
+            #si on a le lien a dans le selecteur de l'url de l'annonce
             if a.name == 'a':
                 href = a.get('href')
                 urls.append(href)
             else:
+            #si on a le selecteur de l'url de l'annonce dans le a
                 a = a.find('a')
                 urls.append(a.get('href'))
         except Exception as e:
