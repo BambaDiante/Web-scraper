@@ -270,7 +270,8 @@ else:
             titre_final.extend(title)
             prix_final.extend(prix)
             lien_final.extend(lien)
-            url=remplirurl(lien_temporaire,url)
+            if complet!="1":
+               url=remplirurl(lien_temporaire,url)
             url_final.extend(url)
 
         except Exception as e:
