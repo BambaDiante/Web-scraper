@@ -65,7 +65,7 @@ def get_all_pages(lien,nbres):
 
 
 
-def parse_content(url,selectername,selecterprice,selecterlink,selecterurl,srcimg,titre,prix,lien,urls):
+def parse_content(url,selectername,selecterprice,selecterlink,selecterurl,srcimg,titre,prix,lien,urls,complet):
 
     titre=url.find_all(class_=selectername)
     for j in range(len(titre)):
@@ -90,20 +90,29 @@ def parse_content(url,selectername,selecterprice,selecterlink,selecterurl,srcimg
         except Exception as e:
             print(f"Erreur: {e}")
 
-    for a in url.find_all(attrs={'class':selecterurl}):
+    for a in url.find_all(attrs={'class': selecterurl}):
         try:
-            a=a.find('a')
-            urls.append(a.get('href'))
+            if a.name == 'a':
+                href = a.get('href')
+                urls.append(href)
+            else:
+                a = a.find('a')
+                urls.append(a.get('href'))
         except Exception as e:
-            print(f"Erreur: {e}")
+            print(f"Erreur: {e} lors de l'extraction de l'url de l'annonce")
 
-    return(titre,prix,lien,urls)
+    return (titre, prix, lien, urls)
+
+
 
 def remplirurl(source,url):
 
     for i in range(len(url)):
         try:
-            url[i]=source[0:-1]+url[i]
+            if source[-1]=="/":
+              url[i]=source[0:-1]+url[i]
+            else:
+                url[i]=source+url[i]
         except Exception as e:
             print(f"Erreur: {e}")
     return(url)
@@ -207,10 +216,12 @@ if reponse=="1":
     sp=input("Veuillez entrer la class dans lequel on a le prix des produit: ")
     sl=input("Veuillez entrer la class dans lequel on a l'image du produit: ")
     src=input("Saisir le selecteur dans lequel on a le lien de l'image du produit: ")
-    surl=input("Saisir le selecteur dans lequel on a le lien de l'annnce du produits: ")
+    surl=input("Saisir le selecteur dans lequel on a le lien de l'anonce du produits: ")
+    complet=input("Tapez 1 si les liens de redirection sont deja complet: ")
 
-    title,prix,lien,url=parse_content(contenu,sn,sp,sl,surl,src,title,prix,lien,url)
-    url=remplirurl(urls,url)
+    title,prix,lien,url=parse_content(contenu,sn,sp,sl,surl,src,title,prix,lien,url,complet)
+    if complet!="1":
+      url=remplirurl(urls,url)
 
     print("Affichage des informations du produit")
 
@@ -241,6 +252,7 @@ else:
     sl=input("Veuillez entrer la class dans lequel on a l'image du produit: ")
     src=input("Saisir le selecteur dans lequel on a le lien de l'image du produit: ")
     surl=input("Saisir le selecteur dans lequel on a le lien de l'annnce du produit: ")
+    complet=input("tapez 1 si les liens de redirections sont deja complet: ")
 
     for i in range(nbres):
 
@@ -252,7 +264,7 @@ else:
             url=[]
             lien_temporaire=f"{urldefault}{i}"
             lien_temp=recuperer(lien_temporaire)
-            title, prix, lien,url = parse_content(lien_temp, sn, sp, sl,surl, src, title, prix, lien,url)
+            title, prix, lien,url = parse_content(lien_temp, sn, sp, sl,surl, src, title, prix, lien,url,complet)
             titre_final.extend(title)
             prix_final.extend(prix)
             lien_final.extend(lien)

@@ -106,7 +106,7 @@ def home():
 
         # SI L'UTILISATEUR N'EXISTE PAS -> CRÉATION AUTOMATIQUE (Inscription)
         if not user:
-            # Création dans utilisateurs.db (SQLAlchemy)
+            # Création dans utip='isateurs.db (SQLAlchemy)
             # On met un mot de passe fictif car l'authentification se fait via Google
             user = User(username=name, email=email, password="GOOGLE_USER_NO_PASSWORD")
             db.session.add(user)
