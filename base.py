@@ -135,3 +135,46 @@ def enregister(nom, mail, adresse, date, numero,password):
         print(f"Erreur lors de l'enregistrement : {e}")
     finally:
         connection.close()
+
+def voirproduits(category):
+    connection = sqlite3.connect('database.db')
+    cursor = connection.cursor()
+    requete=f'SELECT * FROM {category}'
+    cursor.execute(requete)
+    lignes = cursor.fetchall()
+    resultats=[]
+    for ligne in lignes:
+        produit_dict = {
+            'id': ligne[0],
+            'source': ligne[1],
+            'categorie': ligne[2],
+            'titre': ligne[3],
+            'prix': ligne[4],
+            'lien': ligne[5],
+        }
+        resultats.append(produit_dict)
+    connection.close()
+    return resultats
+
+def get_product_from_id(id,category):
+    connection = sqlite3.connect('produits.db')
+    cursor = connection.cursor()
+    requete=f"SELECT * FROM {category} WHERE id=?"
+    cursor.execute(requete, (id,))
+    ligne = cursor.fetchone()
+    connection.close()
+    if ligne is None:
+        return None
+
+    return {
+        'id': ligne[0],
+        'source': ligne[1],
+        'categorie': ligne[2],
+        'titre': ligne[3],
+        'prix': ligne[4],
+        'lien': ligne[5],
+        'url': ligne[6] if len(ligne) > 6 else None,
+    }
+
+
+    

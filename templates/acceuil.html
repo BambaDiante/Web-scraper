@@ -2,22 +2,225 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport"content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icons_names=search,account_circle" />
+    <link rel="stylesheet" href="../static/header.css">
     <title>Comparateur</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        main{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        .bloc{
+            background:#4B0082;
+            width:90%;
+            color:#E5E4E2;
+            height:360px;
+            display:flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+
+        }
+        .bloc img {
+            animation: monter 1.2s ease-out forwards;
+            opacity: 0; /* L'image commence invisible */
+        }
+
+        @keyframes monter {
+            from {
+                transform: translateY(50px);
+                opacity: 0;                 
+            }
+            to {
+                transform: translateY(0);   
+                opacity: 1;                  /* Complètement visible */
+            }
+        }
+        .anim-up {
+            animation: monter 1.2s ease-out forwards;
+            opacity: 0;
+        }
+        /* 2. Scroll Reveal (Apparition au défilement) */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.9s ease-out;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #text{
+            font-family: impact;
+            font-size: 25px;
+        }
+        h3{
+            display: flex;
+            margin:20px auto;
+            color:#4B0082;
+            font-size:28px;
+        }
+        .container{
+            display:flex;
+            flex-direction: column;
+
+        }
+        .card{
+            overflow: hidden;
+            width:100%;
+            height:100%;
+            border-radius: 15px;
+        }
+
+        .card-body{
+            display:flex;
+            flex-direction:column;
+            height:100%;
+        }
+
+        .details{
+            margin-top:auto;
+            background-color: #4B0082;
+            color:#E5E4E2;
+            border-radius:18px;
+            height:40px;
+        }
+        .details:hover{
+            background-color:#4B0082;
+            color:#E5E4E2;
+        }
+        .details:focus{
+            background-color:#4B0082;
+            color:#E5E4E2;
+            box-shadow:none;
+        }
+        
+        .valider{
+            background:transparent;
+            border:none;
+            color:#E5E4E2;
+            outline:none;
+            width:100%;
+            height:100%;
+        }
+
+        .valider:focus,
+        .valider:active{
+            outline:none;
+            box-shadow:none;
+        }
+        .price{
+            margin-top: auto;
+            font-weight: bold;
+        }
+                
+    </style>
 </head>
+
 <body>
-    <h1>Bienvenue dans notre page de comparateur de produit</h1>
-    <div class="contenu">
-        <p>
-            Ce site we est un comparateur de produit entre differentes boutiques en lignes.
-            Afin que vous puissez comparateur le prix ou les caracteristiques d'un produit en fonction des differentes
-            options qui s'offre a vous.
-            si vous souhaitez effectuer une recherche vous pouvez cliquer sur le lien suivant.
-        </p>
-        <a href=""></a>
-    </div>
+    
+    <header>
+        <div class="logo">
+            <h1>Versus</h1>
+        </div>
+
+        <div class="dropdown">
+            <button class="btn btn-dropdown dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Category
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">Divers</a></li>
+                <li><a class="dropdown-item" href="#">Electromenager</a></li>
+                <li><a class="dropdown-item" href="#">Informatique</a></li>
+                <li><a class="dropdown-item" href="#">Sport</a></li>
+            </ul>
+        </div>
+
+        <form action="/search" method="POST" id="search-bar" class="search-container">
+            <input type="search" name="prod" placeholder="Rechercher un produit..." aria-label="Search">
+            <button type="submit" id="search-button">
+                <span class="material-symbols-outlined">search</span>
+            </button>
+        </form>
+
+        <div class="box-account dropdown">
+            <span class="material-symbols-outlined">account_circle</span>
+            <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Mon compte
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end"> <li><a class="dropdown-item" href="{{ url_for('login') }}">Me connecter / M'inscrire</a></li>
+                <li><a class="dropdown-item" href="#">Dashboard</a></li>
+            </ul>
+        </div>
+    </header>
+    <main>
+        <section class="bloc">
+            <p id="text">
+               Faites vos achats en ligne autrement avec Versus.
+               <br>
+               Des milliers de produits enregistres.
+            </p>
+            <img src="../static/picture.png" alt="image" class="anim-up">
+        </section>
+        <section class="container">
+            <h3>Nos produits disponibles</h3>
+            {% if results %}
+                <div class="row">
+                    {% for product in results %}
+                        <div class='col-lg-4 col-md-6 mb-4 d-flex align-items-stretch reveal'>
+                            <div class="card" >
+                                <img src="{{product['lien']}}" class='card-img-top' alt="image">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ product['titre'] }}</h5>
+                                    <p class="card-text price">Prix: {{ product['prix'] }}F CFA</p>
+                                    <form action="/details" class='details'>
+                                        <input type="hidden" name="id" value="{{product['id']}}">
+                                        <input type="hidden" name="category" value="divers">
+                                        <input type="submit" class='valider'value="Voir les details">
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>Aucun produits</p>
+            {% endif %}
+              
+        </section>
+       
+      
+    </main>
+
+
 </body>
+<script>
+    function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                var elementVisible = 100; // Distance avant que l'élément n'apparaisse
+
+                if (elementTop < windowHeight - elementVisible) {
+                    reveals[i].classList.add("active");
+                }
+            }
+        }
+
+        // Écouteur d'événement sur le scroll
+        window.addEventListener("scroll", reveal);
+
+        // Lancer une fois au chargement pour afficher les éléments déjà visibles
+        document.addEventListener("DOMContentLoaded", reveal);
+</script>
 </html>

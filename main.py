@@ -1,14 +1,14 @@
-#ce code est le code source me permettant de configureer les routes de mon api
+import os
+
 from flask import Flask, render_template,jsonify,request,redirect,flash,url_for,session
 import base
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
-from flask_dance.contrib.google import make_google_blueprint, google
-import os
 from dotenv import load_dotenv
+from flask_dance.contrib.google import make_google_blueprint, google
+
 load_dotenv()
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
+os.environ.setdefault('OAUTHLIB_INSECURE_TRANSPORT', '1')
 
 app = Flask(__name__)
 app.secret_key='%##!t09144KVcn021@%d@nXt8&4%wP'
@@ -46,7 +46,7 @@ def index():
     return render_template("loginpage.html")
 
 @app.route('/search/<nom_produit>')
-def search(nom_produit):
+def search_api(nom_produit):
     categories = base.get_category()
     produits=base.get_product(nom_produit,categories)
     if produits:
@@ -73,37 +73,30 @@ def compare(nom_produit):
         "results": produits
     })
 
-@app.route("/rechercher",methods =['GET','POST'])
-def rechercher():
+@app.route("/search",methods =['GET','POST'])
+def search_page():
+    products = []
     if request.method=="POST":
         #si le formulaire a ete envoyee
-        donnees = request.form
-        produit=donnees.get("produit recherche")       
+        produit = request.form.get("prod")
         categories = base.get_category()
-        produits=base.get_product(produit,categories)
+        products = base.get_product(produit,categories)
         # print(produits)
-    else:
-        #si on est a la methode get 
-        produits=None
-    return render_template("recherche.html", resultats=produits)
-
+    return render_template("recherche.html", resultats=products)
 
 @app.route("/home")
 def home():
     # 1. On vérifie si l'authentification Google est active
     if not google.authorized:
         return redirect(url_for("google.login"))
-
     # 2. On récupère les infos du profil Google
     resp = google.get("/oauth2/v2/userinfo")
     if resp.ok:
         google_info = resp.json()
         email = google_info["email"]
         name = google_info.get("name", email)  # Récupère le nom, sinon utilise l'email
-
         #On cherche si l'utilisateur existe déjà dans ta base SQLAlchemy
         user = User.query.filter_by(email=email).first()
-
         # SI L'UTILISATEUR N'EXISTE PAS -> CRÉATION AUTOMATIQUE (Inscription)
         if not user:
             # Création dans utip='isateurs.db (SQLAlchemy)
@@ -154,6 +147,7 @@ def registration():
         new_user = User(username=name, email=email, password=password)
         db.session.add(new_user)
         db.session.commit()
+        db.session.close()
 
         # 4. CONNEXION AUTOMATIQUE
         login_user(new_user)
@@ -164,10 +158,18 @@ def registration():
 
     # Si on arrive en GET (en tapant l'URL), on affiche le formulaire
     return render_template("loginpage.html")
+
 @app.route("/homepage")
 @login_required
 def homepage():
-    return render_template("homepage.html", name=current_user.username)
+    categories = base.get_category()
+    produits=base.voirproduits('divers')
+    return render_template("acceuil.html", 
+                           name=current_user.username, 
+                           categories=categories,
+                           results=produits
+                           )
+
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     if request.method == "POST":
@@ -190,24 +192,34 @@ def logout():
     flash('Vous avez ete deconnecte.', 'info')
     return redirect(url_for('login'))
 
-@app.route("/register", methods=['GET', 'POST'])
-def register():
-    if request.method == "POST":
-        username = request.form.get("username")
-        email = request.form.get("mail")
-        password = request.form.get("password")
-        # Vérifier si l'utilisateur existe déjà
-        user_exists = User.query.filter_by(email=email).first()
-        if user_exists:
-            flash('Cet email est déjà utilisé.', 'danger')
-            return redirect(url_for('register'))
+# @app.route("/register", methods=['GET', 'POST'])
+# def register():
+#     if request.method == "POST":
+#         username = request.form.get("username")
+#         email = request.form.get("mail")
+#         password = request.form.get("password")
+#         # Vérifier si l'utilisateur existe déjà
+#         user_exists = User.query.filter_by(email=email).first()
+#         if user_exists:
+#             flash('Cet email est déjà utilisé.', 'danger')
+#             return redirect(url_for('register'))
 
-        # Création du nouvel utilisateur
-        new_user = User(username=username, email=email, password=password)
-        db.session.add(new_user)
-        db.session.commit()
+#         # Création du nouvel utilisateur
+#         new_user = User(username=username, email=email, password=password)
+#         db.session.add(new_user)
+#         db.session.commit()
 
-        flash('Compte créé avec succès ! Vous pouvez vous connecter.', 'success')
-        return redirect(url_for('login'))
+#         flash('Compte créé avec succès ! Vous pouvez vous connecter.', 'success')
+#         return redirect(url_for('login'))
 
-    return render_template("loginpage.html")
+#     return render_template("loginpage.html")
+@app.route("/details", methods=["GET"])
+@app.route("/details/<id>", methods=["GET"])
+def details(id):
+    id=request.form.get("id")
+    category = request.args.get("category")
+    produit = base.get_product_from_id(id, category)
+    if produit:
+        return render_template("details.html", produit=produit)
+
+    return "Produit introuvable", 404
