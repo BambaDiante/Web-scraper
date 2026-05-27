@@ -121,7 +121,72 @@
             margin-top: auto;
             font-weight: bold;
         }
-                
+               
+        /* Dropdown category */
+        .btn-dropdown{
+            background:#4B0082;
+            color:#E5E4E2;
+            border:none;
+            border-radius:12px;
+            padding:10px 18px;
+            font-weight:600;
+            transition:0.3s ease;
+        }
+
+        .btn-dropdown:hover{
+            background:#5d11a3;
+            color:white;
+        }
+
+        .btn-dropdown:focus,
+        .btn-dropdown:active{
+            background:#4B0082 !important;
+            color:white !important;
+            box-shadow:none !important;
+        }
+
+        /* Menu */
+        .dropdown-menu{
+            border:none;
+            border-radius:16px;
+            padding:10px;
+            box-shadow:0 8px 25px rgba(0,0,0,0.12);
+            min-width:220px;
+        }
+
+        /* Chaque item */
+        .dropdown-menu li{
+            margin-bottom:6px;
+        }
+
+        .dropdown-menu li:last-child{
+            margin-bottom:0;
+        }
+
+        /* Boutons dans le menu */
+        .dropdown-menu input[type="submit"]{
+            width:100%;
+            border:none;
+            background:transparent;
+            padding:12px 15px;
+            border-radius:12px;
+            text-align:left;
+            transition:0.3s ease;
+            font-weight:500;
+            color:#333;
+        }
+
+        /* Hover */
+        .dropdown-menu input[type="submit"]:hover{
+            background:#4B0082;
+            color:white;
+        }
+
+        /* Focus */
+        .dropdown-menu input[type="submit"]:focus{
+            outline:none;
+            box-shadow:none;
+        }
     </style>
 </head>
 
@@ -137,10 +202,30 @@
                 Category
             </button>
             <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#">Divers</a></li>
-                <li><a class="dropdown-item" href="#">Electromenager</a></li>
-                <li><a class="dropdown-item" href="#">Informatique</a></li>
-                <li><a class="dropdown-item" href="#">Sport</a></li>
+                <li>
+                    <form action="/category" method="POST">
+                        <input type="hidden" name="category" value="divers">
+                        <input type="submit" value="Divers">
+                    </form>
+                </li>
+                <li>
+                    <form action="/category" method="POST">
+                        <input type="hidden" name="category" value="electromenager">
+                        <input type="submit" value="Electromenager">
+                    </form>
+                </li>
+                <li>
+                    <form action="/category" method="POST" >
+                        <input type="hidden" name="category" value="informatique">
+                        <input type="submit" value="Informatique">
+                    </form>
+                </li>
+                <li>
+                    <form action="/category" method="POST">
+                        <input type="hidden" name="category" value="sport">
+                        <input type="submit" value="Sport">
+                    </form>
+                </li>
             </ul>
         </div>
 
@@ -156,8 +241,27 @@
             <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 Mon compte
             </button>
-            <ul class="dropdown-menu dropdown-menu-end"> <li><a class="dropdown-item" href="{{ url_for('login') }}">Me connecter / M'inscrire</a></li>
-                <li><a class="dropdown-item" href="#">Dashboard</a></li>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <a class="dropdown-item" href="{{ url_for('login') }}">
+                        Me connecter / M'inscrire
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="#">
+                        Mon historique
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="#">
+                        Mes favoris
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{{url_for('logout')}}">
+                        Me deconnecter
+                    </a>
+                </li>
             </ul>
         </div>
     </header>
@@ -183,7 +287,7 @@
                                     <p class="card-text price">Prix: {{ product['prix'] }}F CFA</p>
                                     <form action="/details" method="POST" class='details'>
                                         <input type="hidden" name="id" value="{{product['id']}}">
-                                        <input type="hidden" name="category" value="divers">
+                                        <input type="hidden" name="category" value="{{product['categorie']}}">
                                         <input type="submit" class='valider'value="Voir les details">
                                     </form>
                                 </div>

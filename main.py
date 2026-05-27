@@ -12,18 +12,46 @@ os.environ.setdefault('OAUTHLIB_INSECURE_TRANSPORT', '1')
 
 app = Flask(__name__)
 app.secret_key='%##!t09144KVcn021@%d@nXt8&4%wP'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///utilisateurs.db'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(app.root_path, 'produits.db').replace('\\', '/')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
+
 login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'
+
+
+# 2. Adaptation du modèle à la structure de la table 'users' de produits.db
 class User(UserMixin, db.Model):
+    __tablename__ = 'users'  
+
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(20), nullable=False)
-    #unique=True ici car l'email doit rester unique
+    nom = db.Column(db.String(100), nullable=False)  
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(60), nullable=False)
+    adresse = db.Column(db.String(255), nullable=True) 
+    mot_de_passe = db.Column(db.String(60), nullable=False)   
+    date_inscription = db.Column(db.String(50), nullable=True)  
+    telephone = db.Column(db.String(50), nullable=True) 
+
+    @property
+    def username(self):
+        return self.nom
+
+    @username.setter
+    def username(self, value):
+        self.nom = value
+
+    @property
+    def password(self):
+        return self.mot_de_passe
+
+    @password.setter
+    def password(self, value):
+        self.mot_de_passe = value
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -159,12 +187,12 @@ def registration():
     return render_template("loginpage.html")
 
 @app.route("/homepage")
-@login_required
+# @login_required
 def homepage():
     categories = base.get_category()
     produits=base.voirproduits('divers')
     return render_template("acceuil.html", 
-                           name=current_user.username, 
+                        #    name=current_user.username, 
                            categories=categories,
                            results=produits
                            )
@@ -179,6 +207,7 @@ def login():
         if user and user.password == password:
             login_user(user)
             session['username'] = user.username
+            session['id']=user.id
             return redirect(url_for('homepage'))
         else:
             flash('Email ou mot de passe incorrect.', 'danger')
@@ -191,33 +220,20 @@ def logout():
     flash('Vous avez ete deconnecte.', 'info')
     return redirect(url_for('login'))
 
-# @app.route("/register", methods=['GET', 'POST'])
-# def register():
-#     if request.method == "POST":
-#         username = request.form.get("username")
-#         email = request.form.get("mail")
-#         password = request.form.get("password")
-#         # Vérifier si l'utilisateur existe déjà
-#         user_exists = User.query.filter_by(email=email).first()
-#         if user_exists:
-#             flash('Cet email est déjà utilisé.', 'danger')
-#             return redirect(url_for('register'))
-
-#         # Création du nouvel utilisateur
-#         new_user = User(username=username, email=email, password=password)
-#         db.session.add(new_user)
-#         db.session.commit()
-
-#         flash('Compte créé avec succès ! Vous pouvez vous connecter.', 'success')
-#         return redirect(url_for('login'))
-
-#     return render_template("loginpage.html")
 @app.route("/details", methods=["POST"])
+@login_required
 def details():
+    id_user=session['id']
     id = request.form.get("id")
     category = request.form.get("category")
     produit = base.get_product_from_id(id, category)
     if produit:
-        return render_template("details.html", produit=produit)
+        return render_template("details.html", produit=produit,cat=category,user_id=id_user)
 
     return "Produit introuvable", 404
+
+@app.route("/category", methods=["POST"])
+def category():
+    category=request.form.get("category")
+    products=base.voirproduits(category)
+    return render_template("category.html", results=products, cat=category)

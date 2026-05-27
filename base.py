@@ -137,7 +137,7 @@ def enregister(nom, mail, adresse, date, numero,password):
         connection.close()
 
 def voirproduits(category):
-    connection = sqlite3.connect('database.db')
+    connection = sqlite3.connect('produits.db')
     cursor = connection.cursor()
     requete=f'SELECT * FROM {category}'
     cursor.execute(requete)
@@ -151,6 +151,7 @@ def voirproduits(category):
             'titre': ligne[3],
             'prix': ligne[4],
             'lien': ligne[5],
+            'url':ligne[6],
         }
         resultats.append(produit_dict)
     connection.close()

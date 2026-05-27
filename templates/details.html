@@ -178,8 +178,27 @@
             <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 Mon compte
             </button>
-            <ul class="dropdown-menu dropdown-menu-end"> <li><a class="dropdown-item" href="{{ url_for('login') }}">Me connecter / M'inscrire</a></li>
-                <li><a class="dropdown-item" href="#">Dashboard</a></li>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <a class="dropdown-item" href="{{ url_for('login') }}">
+                        Me connecter / M'inscrire
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="#">
+                        Mon historique
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="#">
+                        Mes favoris
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{{url_for('logout')}}">
+                        Me deconnecter
+                    </a>
+                </li>
             </ul>
         </div>
     </header>
