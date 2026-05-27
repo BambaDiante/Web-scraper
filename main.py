@@ -212,15 +212,10 @@ def logout():
 #         return redirect(url_for('login'))
 
 #     return render_template("loginpage.html")
-@app.route("/details", methods=["GET"])
-@app.route("/details/<id>", methods=["GET"])
-def details(id=None):
-    # Accept id either as path param or query string (?id=...) and category as query string
-    if id is None:
-        id = request.args.get("id")
-
-    category = request.args.get("category")
-
+@app.route("/details", methods=["POST"])
+def details():
+    id = request.form.get("id")
+    category = request.form.get("category")
     produit = base.get_product_from_id(id, category)
     if produit:
         return render_template("details.html", produit=produit)

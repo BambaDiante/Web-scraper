@@ -181,7 +181,7 @@
                                 <div class="card-body">
                                     <h5 class="card-title">{{ product['titre'] }}</h5>
                                     <p class="card-text price">Prix: {{ product['prix'] }}F CFA</p>
-                                    <form action="/details"  class='details'>
+                                    <form action="/details" method="POST" class='details'>
                                         <input type="hidden" name="id" value="{{product['id']}}">
                                         <input type="hidden" name="category" value="divers">
                                         <input type="submit" class='valider'value="Voir les details">
