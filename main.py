@@ -20,9 +20,8 @@ login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    # On retire unique=True ici pour accepter les doublons de noms
     username = db.Column(db.String(20), nullable=False)
-    # On garde unique=True ici car l'email doit rester unique
+    #unique=True ici car l'email doit rester unique
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
 @login_manager.user_loader
@@ -94,12 +93,12 @@ def home():
     if resp.ok:
         google_info = resp.json()
         email = google_info["email"]
-        name = google_info.get("name", email)  # Récupère le nom, sinon utilise l'email
-        #On cherche si l'utilisateur existe déjà dans ta base SQLAlchemy
+        name = google_info.get("name", email)  # recupere le nom, sinon utilise l'email
+        #On cherche si l'utilisateur existe déjà dans la base SQLAlchemy
         user = User.query.filter_by(email=email).first()
-        # SI L'UTILISATEUR N'EXISTE PAS -> CRÉATION AUTOMATIQUE (Inscription)
+        # SI L'UTILISATEUR N'EXISTE PAS -> CREATION AUTOMATIQUE (Inscription)
         if not user:
-            # Création dans utip='isateurs.db (SQLAlchemy)
+            # Creation dans utip=utilisateurs.db (SQLAlchemy)
             # On met un mot de passe fictif car l'authentification se fait via Google
             user = User(username=name, email=email, password="GOOGLE_USER_NO_PASSWORD")
             db.session.add(user)
@@ -215,9 +214,13 @@ def logout():
 #     return render_template("loginpage.html")
 @app.route("/details", methods=["GET"])
 @app.route("/details/<id>", methods=["GET"])
-def details(id):
-    id=request.form.get("id")
+def details(id=None):
+    # Accept id either as path param or query string (?id=...) and category as query string
+    if id is None:
+        id = request.args.get("id")
+
     category = request.args.get("category")
+
     produit = base.get_product_from_id(id, category)
     if produit:
         return render_template("details.html", produit=produit)

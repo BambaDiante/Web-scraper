@@ -175,6 +175,3 @@ def get_product_from_id(id,category):
         'lien': ligne[5],
         'url': ligne[6] if len(ligne) > 6 else None,
     }
-
-
-    
